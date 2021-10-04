@@ -1,0 +1,6 @@
+# Python files
+venv/
+__pycache__/
+
+# Configuration files
+config.py
