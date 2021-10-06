@@ -1,6 +1,7 @@
 import sys
 import time
 import logging
+import logging.handlers
 
 from config import config
 from lib import email_service
@@ -8,7 +9,9 @@ from lib import email_service
 
 logger = logging.getLogger("root")
 logger.setLevel(logging.INFO)
-handler = logging.FileHandler("out.log")
+handler = logging.handlers.RotatingFileHandler(
+    "out.log", maxBytes=10_000_000, backupCount=5
+)
 formatter = logging.Formatter(
     "%(levelname)s:%(asctime)s::%(funcName)s:%(message)s", "%Y-%m-%d %H:%M:%S"
 )
