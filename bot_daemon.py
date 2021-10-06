@@ -2,6 +2,7 @@ import sys
 import time
 import logging
 import logging.handlers
+import traceback
 
 from config import config
 from lib import email_service
@@ -9,20 +10,23 @@ from lib import email_service
 
 logger = logging.getLogger("root")
 logger.setLevel(logging.INFO)
-handler = logging.handlers.RotatingFileHandler(
+filehandler = logging.handlers.RotatingFileHandler(
     "out.log", maxBytes=10_000_000, backupCount=5
 )
+consolehandler = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter(
     "%(levelname)s:%(asctime)s::%(funcName)s:%(message)s", "%Y-%m-%d %H:%M:%S"
 )
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+filehandler.setFormatter(formatter)
+consolehandler.setFormatter(formatter)
+logger.addHandler(filehandler)
+logger.addHandler(consolehandler)
 
 
 def main(mail):
     logger.info("Running main")
     requests = email_service.check_mail(mail, config)
-    print(requests)
+    logger.info("Requests received: {}".format(requests))
 
 
 def run_daemon():
@@ -45,7 +49,7 @@ if __name__ == "__main__":
             run_daemon()
         except Exception as e:
             # Catch all interrupts but KeyboardInterrupt and SystemExit
-            logging.critical(e)
+            logging.critical(traceback.format_exc())
 
         # Wait before resetting
         time.sleep(5)
