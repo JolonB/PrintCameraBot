@@ -1,6 +1,9 @@
 import time
 import base64
 import random
+import logging
+
+logger = logging.getLogger("root")
 
 import pyotp
 
@@ -14,16 +17,20 @@ def generate_secret_token():
     return base64.b32encode(secret_string.encode(ENCODING)).decode(ENCODING)[4:12]
 
 
-def verify_otp_code(user: str, code: str, token: dict):
+def verify_otp_code(user: str, code: str, timestamp: int, config: dict):
     # Get the user's secret key
-    secret = token  # config_data['approved_users'][user]['secret']
+    secret = config["approved_users"][user]
 
     # Create a TOTP object
     totp = pyotp.TOTP(secret)
 
-    two_fact_lookback = 60  # config_data['2fa_lookback']
+    two_fact_lookback = config["2fa_lookback"]
 
+    # Iterate over all valid timestamps
     for lookback in range(two_fact_lookback // TWO_FACT_AUTH_TIMEOUT + 1):
-        if totp.verify(code, for_time=time.time() - lookback * TWO_FACT_AUTH_TIMEOUT):
+        excepted_code = totp.at(timestamp - lookback * TWO_FACT_AUTH_TIMEOUT)
+        logger.debug("Expected code: {}. Got: {}".format(excepted_code, code))
+        # Return True if the code is valid within the timestamps
+        if excepted_code == code:
             return True
     return False

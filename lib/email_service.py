@@ -92,7 +92,12 @@ def check_mail(mail: imaplib.IMAP4_SSL, config: dict):
 def _parse_email_datetime(datetime_str: str):
     datetime_str = datetime_str.strip()
     parsed_datetime = email.utils.parsedate(datetime_str)
-    return time.mktime(parsed_datetime)
+    return int(time.mktime(parsed_datetime))
+
+
+def send_image(image, address, config):
+    logger.info("Sending image to {}".format(address))
+    pass
 
 
 def clear_large_mail(mail: imaplib.IMAP4_SSL, config: dict):

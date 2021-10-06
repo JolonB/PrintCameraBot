@@ -5,11 +5,13 @@ import logging.handlers
 import traceback
 
 from config import config
+from lib import two_factor
+from lib import img_capture
 from lib import email_service
 
 
 logger = logging.getLogger("root")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 filehandler = logging.handlers.RotatingFileHandler(
     "out.log", maxBytes=10_000_000, backupCount=5
 )
@@ -24,9 +26,26 @@ logger.addHandler(consolehandler)
 
 
 def main(mail):
-    logger.info("Running main")
+    logger.info("Running main loop")
+
+    # Read mail
     requests = email_service.check_mail(mail, config)
     logger.info("Requests received: {}".format(requests))
+
+    # Process mail
+    for request in requests:
+        logger.info("Processing request: {}".format(request))
+        # Check if two-factor code is valid
+        success = two_factor.verify_otp_code(
+            request["address"], request["body"], request["timestamp"], config
+        )
+        if not success:
+            logger.info("Two-factor code invalid")
+            continue
+
+        # If two-factor code is valid, take a photo
+        logger.info("Two-factor code valid")
+        img_path = img_capture.take_photo(config)
 
 
 def run_daemon():
