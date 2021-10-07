@@ -7,3 +7,6 @@ config.py
 
 # Log files
 *.log*
+
+# Temp images
+.tmp.jpg

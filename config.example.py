@@ -7,7 +7,8 @@ config = {
     "max_emails": 10,  # latest emails received
     "2fa_lookback": 60,  # seconds
     "approved_users": {
-        "user1@email.com": "ABCD1234",
+        "user1@email.com": "ABCD1234",  # email : OTP secret
     },
     "camera_port": "/dev/video0",
+    "image_resolution": (640, 480),
 }

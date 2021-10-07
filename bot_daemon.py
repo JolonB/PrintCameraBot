@@ -45,7 +45,9 @@ def main(mail):
 
         # If two-factor code is valid, take a photo
         logger.info("Two-factor code valid")
-        img_path = img_capture.take_photo(config)
+        img_capture.take_photo(config)
+
+        # Send email
 
 
 def run_daemon():

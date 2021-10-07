@@ -1,1 +1,2 @@
-pyotp>=2.6.0
+pyotp==2.6.0
+opencv-python==4.5.3
