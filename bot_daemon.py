@@ -24,10 +24,10 @@ consolehandler.setFormatter(formatter)
 logger.addHandler(filehandler)
 logger.addHandler(consolehandler)
 
+IMG_FILENAME = '.tmp.jpg'
+
 
 def main(mail):
-    logger.info("Running main loop")
-
     # Read mail
     requests = email_service.check_mail(mail, config)
     logger.info("Requests received: {}".format(requests))
@@ -45,9 +45,10 @@ def main(mail):
 
         # If two-factor code is valid, take a photo
         logger.info("Two-factor code valid")
-        img_capture.take_photo(config)
+        img_capture.capture(config, IMG_FILENAME)
 
         # Send email
+        email_service.send_image(request["address"], IMG_FILENAME, config)
 
 
 def run_daemon():
@@ -58,7 +59,11 @@ def run_daemon():
             loop_start = time.time()
             main(mail)
             elapsed = time.time() - loop_start
-            time.sleep(config["polling_period"] - elapsed)
+            try:
+                time.sleep(config["polling_period"] - elapsed)
+            except ValueError:
+                logger.warning("Sleeping for a negative amount of time. Consider" 
+                            " increasing polling_period.")
     finally:
         # Close email service no matter how the daemon ends
         email_service.close_email(mail)

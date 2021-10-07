@@ -4,6 +4,8 @@ import logging
 import smtplib
 import imaplib
 import email.utils
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
 
 logger = logging.getLogger("root")
 
@@ -95,9 +97,24 @@ def _parse_email_datetime(datetime_str: str):
     return int(time.mktime(parsed_datetime))
 
 
-def send_image(image, address, config):
+def send_image(address:str, filename:str, config:dict):
     logger.info("Sending image to {}".format(address))
-    pass
+
+    msg = MIMEMultipart()
+    msg['From'] = config["credentials"]["address"]
+    msg['To'] = address
+    msg['Subject'] = config["email_subject"]
+
+    with open(filename, "rb") as f:
+        part = MIMEApplication(f.read(), Name=filename)
+
+    part['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+    msg.attach(part)
+
+    with smtplib.SMTP("smtp.gmail.com") as smtp:
+        smtp.starttls()
+        smtp.login(config["credentials"]["address"], config["credentials"]["password"])
+        smtp.sendmail(config["credentials"]["address"], address, msg.as_string())
 
 
 def clear_large_mail(mail: imaplib.IMAP4_SSL, config: dict):
