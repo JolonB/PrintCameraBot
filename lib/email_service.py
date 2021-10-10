@@ -100,18 +100,18 @@ def _parse_email_datetime(datetime_str: str):
     return int(time.mktime(parsed_datetime))
 
 
-def send_image(address:str, filename:str, config:dict):
+def send_image(address: str, filename: str, config: dict):
     logger.info("Sending image to {}".format(address))
 
     msg = MIMEMultipart()
-    msg['From'] = config["credentials"]["address"]
-    msg['To'] = address
-    msg['Subject'] = config["email_subject"]
+    msg["From"] = config["credentials"]["address"]
+    msg["To"] = address
+    msg["Subject"] = config["email_subject"]
 
     with open(filename, "rb") as f:
         part = MIMEApplication(f.read(), Name=filename)
 
-    part['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+    part["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
     msg.attach(part)
 
     with smtplib.SMTP(config["credentials"]["smtp_host"]) as smtp:

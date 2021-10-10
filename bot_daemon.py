@@ -13,7 +13,9 @@ from lib import email_service
 logger = logging.getLogger("root")
 logger.setLevel(logging.DEBUG)
 filehandler = logging.handlers.RotatingFileHandler(
-    "out.log", maxBytes=config["logger_filesize"], backupCount=max(1, config["log_filecount"])
+    "out.log",
+    maxBytes=config["logger_filesize"],
+    backupCount=max(1, config["log_filecount"]),
 )
 consolehandler = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter(
@@ -24,7 +26,7 @@ consolehandler.setFormatter(formatter)
 logger.addHandler(filehandler)
 logger.addHandler(consolehandler)
 
-IMG_FILENAME = '.tmp.jpg'
+IMG_FILENAME = ".tmp.jpg"
 
 
 def main(mail):
@@ -62,8 +64,10 @@ def run_daemon():
             try:
                 time.sleep(config["polling_period"] - elapsed)
             except ValueError:
-                logger.warning("Sleeping for a negative amount of time. Consider" 
-                            " increasing polling_period.")
+                logger.warning(
+                    "Sleeping for a negative amount of time. Consider"
+                    " increasing polling_period."
+                )
     finally:
         # Close email service no matter how the daemon ends
         email_service.close_email(mail)

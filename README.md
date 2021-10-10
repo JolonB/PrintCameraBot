@@ -44,10 +44,13 @@ Now you're ready to go.
 To generate a 2-factor authentication code, make sure your virtual environment is set up (see above).
 Run the following command: `python setup_2fa.py`.
 
-This will generate an OTP key that you should copy into your authenticator app (Google Authenticator, Authy, etc.).  
-Your authenticator app will generate a 6-digit code every 30 seconds.
-Copy the latest code into your terminal when the program requests it.
-If it matches, your code is set up; if it doesn't, you should rerun the command.
+This will generate an 8-digit OTP *key* that you should copy into your authenticator app (Google Authenticator, Authy, etc.).  
+Your authenticator app will generate a 6-digit *code* every 30 seconds.
+Copy the latest *code* into your terminal when the program requests it.
+If it matches, your *code* is set up; if it doesn't, you probably entered it wrong and should enter the key again into your authenticator app.
+
+Once that is set up, you should move on to the config file step and add the email address and 8-digit authenticator *key* to the `approved_users` field.
+When you add a new user, you have the option to reuse the same key or to generate a new one for them.
 
 ### Setting up the config file
 
@@ -56,16 +59,16 @@ Modify the values in the file to suit your needs.
 The values marked with a **\*** must be changed.
 
 * credentials
-    * address**\*** - the email address created for the bot
-    * password**\*** - the password for the above email address
+    * address\* - the email address created for the bot
+    * password\* - the password for the above email address
     * imap_host - the IMAP host address; only change this if you aren't using Gmail
     * smtp_host - the SMTP host address; only change this if you aren't using Gmail
 * email_subject - the subject of the email sent by the Printer Monitor
 * polling_freq - the number of seconds the Monitor waits between checking for new emails
 * max_emails - the number of emails the monitor will process, any more will be discarded to prevent spam; set to 0 if you want to read all emails
 * 2fa_lookback - the number of seconds for the two-factor authentication to look back for codes; this should be enough time to copy the code and send an email
-* approved_users**\*** - email address : OTP secret pairs; each user that can access the Monitor should be set up
-* camera_port**\*** - the port on your device that the camera is connected to; on Linux devices this will probably be `"/dev/video0"` (you may need to change the number), on Windows this will probably be `0` (notice that there are no speech marks)
+* approved_users* - email address : OTP secret pairs; each user that can access the Monitor should be set up
+* camera_port* - the port on your device that the camera is connected to; it is probably easiest to guess and check until you get the correct value
 * image_resolution - the resolution of the image to take; most webcams should support 640x480, but you can set if higher if yours supports it
 * camera_boot_time - the time taken in seconds to initialise the camera; this should be increased if your images look too dark
 * logger_filesize - the maximum size of each log file (in bytes); decrease this if your device has limited storage capacity
@@ -75,9 +78,29 @@ The values marked with a **\*** must be changed.
 
 ### Testing the Camera
 
+After setting up the configuration file, you can test the camera to ensure your settings work.
+This can be done by running `python camera_test.py`.
+If everything works, the script will ask you if you want to save or display the image.
+If you are using SSH (without X11 forwarding) or Windows Subsystem for Linux, it will be better to save the image.
+
+There are a few possible issues you may face:
+
+| Issue | Fix |
+| --- | --- |
+| "can't open camera by index" | Camera is disabled. Try restarting your device or reinstalling the drivers |
+| "Failed to read from camera" | `camera_port` is incorrect; try providing a different one |
+| Image isn't correct resolution | Your camera probably doesn't support the resolution and is providing the closest one it can find |
+| Image is too dark | Increase `exposure_time` or `camera_boot_time` to allow the camera to expose itself to more light OR turn on a light near your printer OR try rebooting your device | 
+
 ### Starting Up
 
+Run `python bot_daemon.py`.
+
+<!-- TODO this section should explain everything that happens when you run the bot_daemon script -->
+
 ## Security
+
+<!-- TODO this section will talk about how this service tries to be secure -->
 
 ## Limitations
 

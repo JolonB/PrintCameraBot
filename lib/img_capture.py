@@ -1,4 +1,5 @@
 import time
+import math
 import logging
 
 import cv2
@@ -9,6 +10,9 @@ logger = logging.getLogger("root")
 def capture(config: dict):
     # Initialise the camera
     cam = cv2.VideoCapture(config["camera_port"])
+    cam.set(
+        cv2.CAP_PROP_EXPOSURE, round(math.log10(config["exposure_time"] / 1000.0), 4)
+    )
     time.sleep(config["camera_boot_time"])
 
     # Attempt to read from the camera
@@ -27,7 +31,7 @@ def capture(config: dict):
     return frame
 
 
-def capture_and_save(config:dict, filename:str):
+def capture_and_save(config: dict, filename: str):
     frame = capture(config)
 
     if frame is None:
