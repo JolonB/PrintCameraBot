@@ -13,7 +13,7 @@ from lib import email_service
 logger = logging.getLogger("root")
 logger.setLevel(logging.DEBUG)
 filehandler = logging.handlers.RotatingFileHandler(
-    "out.log", maxBytes=10_000_000, backupCount=5
+    "out.log", maxBytes=config["logger_filesize"], backupCount=max(1, config["log_filecount"])
 )
 consolehandler = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter(

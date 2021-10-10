@@ -6,10 +6,10 @@ import cv2
 logger = logging.getLogger("root")
 
 
-def capture(config: dict, filename: str):
+def capture(config: dict):
     # Initialise the camera
     cam = cv2.VideoCapture(config["camera_port"])
-    time.sleep(1)
+    time.sleep(config["camera_boot_time"])
 
     # Attempt to read from the camera
     retval = False
@@ -20,11 +20,21 @@ def capture(config: dict, filename: str):
         if attempts_remaining <= 0:
             logger.error("Failed to read from camera")
             cam.release()
-            return False
+            return None
+
+    # Release the camera
+    cam.release()
+    return frame
+
+
+def capture_and_save(config:dict, filename:str):
+    frame = capture(config)
+
+    if frame is None:
+        return False
 
     # Save the image to a temp location
     logger.info("Successfully read from camera. Saving image to {}".format(filename))
     cv2.imwrite(filename, frame)
-    cam.release()
 
     return True

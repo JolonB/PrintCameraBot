@@ -16,7 +16,7 @@ DATE_REGEX = re.compile(r"Date: (.+)")
 
 def open_email(config: dict):
     logger.info("Opening email")
-    mail = imaplib.IMAP4_SSL("imap.gmail.com")
+    mail = imaplib.IMAP4_SSL(config["credentials"]["imap_host"])
     mail.login(config["credentials"]["address"], config["credentials"]["password"])
     mail.select("inbox")
     return mail
@@ -43,8 +43,6 @@ def check_mail(mail: imaplib.IMAP4_SSL, config: dict):
     emails = []
     emails_read = 0
     for id_ in reversed(email_ids):
-        if config["max_emails"] > 0 and emails_read >= config["max_emails"]:
-            break
 
         # Skip any empty IDs (this shouldn't happen, but just in case)
         if id_ == b"":
@@ -58,6 +56,11 @@ def check_mail(mail: imaplib.IMAP4_SSL, config: dict):
         # Skip if success!='OK'
         if success != "OK":
             raise RuntimeError("Error fetching email")
+
+        # Open emails but don't process them if the max number of emails has been reached
+        # If we don't open them, they won't be marked as read and will be opened later
+        if config["max_emails"] > 0 and emails_read >= config["max_emails"]:
+            continue
 
         # Remove any data that isn't a tuple because we don't care about those
         data = [x for x in data if isinstance(x, tuple)]
@@ -111,7 +114,7 @@ def send_image(address:str, filename:str, config:dict):
     part['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
     msg.attach(part)
 
-    with smtplib.SMTP("smtp.gmail.com") as smtp:
+    with smtplib.SMTP(config["credentials"]["smtp_host"]) as smtp:
         smtp.starttls()
         smtp.login(config["credentials"]["address"], config["credentials"]["password"])
         smtp.sendmail(config["credentials"]["address"], address, msg.as_string())
