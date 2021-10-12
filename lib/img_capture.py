@@ -13,7 +13,10 @@ def capture(config: dict):
     cam.set(
         cv2.CAP_PROP_EXPOSURE, round(math.log10(config["exposure_time"] / 1000.0), 4)
     )
-    time.sleep(config["camera_boot_time"])
+    # Read from the camera to give it time to expose (because a delay doesn't seem to work)
+    for _ in config["camera_boot_time"]*2:
+        _ = cam.read()
+        time.sleep(0.5)
 
     # Attempt to read from the camera
     retval = False

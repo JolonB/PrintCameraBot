@@ -29,7 +29,7 @@ logger.addHandler(consolehandler)
 IMG_FILENAME = ".tmp.jpg"
 
 
-def main(mail):
+def process_mail(mail):
     # Read mail
     requests = email_service.check_mail(mail, config)
     logger.info("Requests received: {}".format(requests))
@@ -47,7 +47,7 @@ def main(mail):
 
         # If two-factor code is valid, take a photo
         logger.info("Two-factor code valid")
-        img_capture.capture(config, IMG_FILENAME)
+        img_capture.capture_and_save(config, IMG_FILENAME)
 
         # Send email
         email_service.send_image(request["address"], IMG_FILENAME, config)
@@ -59,7 +59,7 @@ def run_daemon():
         while True:
             # Run the main function at the specified polling period
             loop_start = time.time()
-            main(mail)
+            process_mail(mail)
             elapsed = time.time() - loop_start
             try:
                 time.sleep(config["polling_period"] - elapsed)
@@ -72,8 +72,7 @@ def run_daemon():
         # Close email service no matter how the daemon ends
         email_service.close_email(mail)
 
-
-if __name__ == "__main__":
+def main():
     while True:
         try:
             run_daemon()
@@ -83,3 +82,6 @@ if __name__ == "__main__":
 
         # Wait before resetting
         time.sleep(5)
+
+if __name__ == "__main__":
+    main()

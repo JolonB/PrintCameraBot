@@ -7,15 +7,18 @@ The benefit of this solution over others is that it doesn't require forwarding a
 
 ## Setup
 
-### Creating the email address
+These instructions are written to *hopefully* allow anyone to run this on their own device.
+If you're already familiar with Git and Python, you'll be able to skip some of these steps.
 
-The instructions here are specific to Gmail accounts.
-You will need to find how to make it work with a different account if you choose to use one.
+Note that these instructions were written while testing on Ubuntu 20.04.
+I've tried to write instructions for Windows based on the information I can find online, but feel free to let me know if any instructions are wrong by raising an issue in Github.
 
-1. Create a new Google Account. Take note of the email address and password.
-1. Enable less secure apps by going to [this page](https://myaccount.google.com/lesssecureapps) and setting *"Allow less secure apps"* to **ON**.
+### Cloning the repository
 
-That's all that needs to be done, however, if you want additional security, you may be able to set up a whitelist on the account to only allow emails from the desired sender.
+If you have git installed on your device, simply clone it with `git clone https://github.com/JolonB/PrintCameraBot`.
+
+If you don't have git, you can download this repo by clicking the **Code** button in the top right and then selecting **Download ZIP**.
+Make sure to unzip the project before continuing.
 
 ### Setting up Python
 
@@ -38,6 +41,16 @@ Finally, you need to install all of the required packages.
 This can be done with `python -m pip install -r requirements.txt`.
 
 Now you're ready to go.
+
+### Creating the email address
+
+The instructions here are specific to Gmail accounts.
+You will need to find how to make it work with a different account if you choose to use one.
+
+1. Create a new Google Account. Take note of the email address and password.
+1. Enable less secure apps by going to [this page](https://myaccount.google.com/lesssecureapps) and setting *"Allow less secure apps"* to **ON**.
+
+That's all that needs to be done, however, if you want additional security, you may be able to set up a whitelist on the account to only allow emails from the desired sender.
 
 ### Generating a 2-factor authentication code
 
@@ -64,7 +77,7 @@ The values marked with a **\*** must be changed.
     * imap_host - the IMAP host address; only change this if you aren't using Gmail
     * smtp_host - the SMTP host address; only change this if you aren't using Gmail
 * email_subject - the subject of the email sent by the Printer Monitor
-* polling_freq - the number of seconds the Monitor waits between checking for new emails
+* polling_period - the number of seconds the Monitor waits between checking for new emails
 * max_emails - the number of emails the monitor will process, any more will be discarded to prevent spam; set to 0 if you want to read all emails
 * 2fa_lookback - the number of seconds for the two-factor authentication to look back for codes; this should be enough time to copy the code and send an email
 * approved_users* - email address : OTP secret pairs; each user that can access the Monitor should be set up
@@ -76,7 +89,7 @@ The values marked with a **\*** must be changed.
 
 **IMPORTANT:** make sure you keep this file private as it contains the password for your email service
 
-### Testing the Camera
+### Testing the camera
 
 After setting up the configuration file, you can test the camera to ensure your settings work.
 This can be done by running `python camera_test.py`.
@@ -92,15 +105,16 @@ There are a few possible issues you may face:
 | Image isn't correct resolution | Your camera probably doesn't support the resolution and is providing the closest one it can find |
 | Image is too dark | Increase `exposure_time` or `camera_boot_time` to allow the camera to expose itself to more light OR turn on a light near your printer OR try rebooting your device | 
 
-### Starting Up
+### Starting up
 
-Run `python bot_daemon.py`.
+Run `python main.py`.
 
 <!-- TODO this section should explain everything that happens when you run the bot_daemon script -->
 
 ## Security
 
-<!-- TODO this section will talk about how this service tries to be secure -->
+<!-- TODO this section will talk about how this service tries to be secure
+Mention the challenge for anyone to try access my one -->
 
 ## Limitations
 

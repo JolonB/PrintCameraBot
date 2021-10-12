@@ -5,7 +5,7 @@ import cv2
 from config import config
 from lib.img_capture import capture
 
-if __name__ == "__main__":
+def main():
     frame = capture(config)
 
     if frame is None:
@@ -30,3 +30,6 @@ if __name__ == "__main__":
         cv2.imshow("Camera Test", frame)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()

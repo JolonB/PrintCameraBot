@@ -16,6 +16,15 @@ def generate_secret_token():
     secret_string = "{}".format(time.time() * random.random())
     return base64.b32encode(secret_string.encode(ENCODING)).decode(ENCODING)[4:12]
 
+def verify_code_only(code, secret_token):
+    # Create a TOTP object
+    totp = pyotp.TOTP(secret_token)
+
+    for lookback in range(2):
+        expected_code = totp.at(time.time() - lookback * TWO_FACT_AUTH_TIMEOUT)
+        if expected_code == code:
+            return True
+    return False
 
 def verify_otp_code(user: str, code: str, timestamp: int, config: dict):
     # Get the user's secret key
@@ -28,9 +37,9 @@ def verify_otp_code(user: str, code: str, timestamp: int, config: dict):
 
     # Iterate over all valid timestamps
     for lookback in range(two_fact_lookback // TWO_FACT_AUTH_TIMEOUT + 1):
-        excepted_code = totp.at(timestamp - lookback * TWO_FACT_AUTH_TIMEOUT)
-        logger.debug("Expected code: {}. Got: {}".format(excepted_code, code))
+        expected_code = totp.at(timestamp - lookback * TWO_FACT_AUTH_TIMEOUT)
+        logger.debug("Expected code: {}. Got: {}".format(expected_code, code))
         # Return True if the code is valid within the timestamps
-        if excepted_code == code:
+        if expected_code == code:
             return True
     return False

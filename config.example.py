@@ -6,7 +6,7 @@ config = {
         "smtp_host": "smtp.gmail.com",
     },
     "email_subject": "Requested Image",  # the subject of the response email
-    "polling_freq": 60,  # seconds
+    "polling_period": 60,  # seconds
     "max_emails": 10,  # latest emails received
     "2fa_lookback": 90,  # seconds (ideally long enough for you to draft and send an email)
     "approved_users": {
