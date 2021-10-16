@@ -3,7 +3,7 @@
 Print Monitor is a way to securely monitor your 3D prints from anywhere with Internet access.
 Simply by sending an email to the Print Monitor, you will receive a reply with a photo showing the current state of the print.
 
-The benefit of this solution over others is that it doesn't require forwarding any ports and it can run on most devices even if they don't have OctoPrint set up.
+The benefit of this solution over others is that it doesn't require forwarding any ports and it can run on most devices even if they don't have OctoPrint set up (like [this one](https://github.com/cameroncros/OctoPrint-DiscordRemote) which I would suggest if you *do* have OctoPrint).
 
 ## Setup
 
@@ -33,7 +33,7 @@ This can be done by running `python3 -m venv venv`.
 On Windows, you may need to replace `python3` with `py`.
 
 You then should activate the virtual environment.
-You will need to do this any time you leave the environment before you can run the scripts again.  
+**You will need to do this any time you leave the environment before you can run the scripts again.**  
 On Linux, `. venv/bin/activate`.  
 On Windows, `.\venv\Scripts\activate`.
 
@@ -71,21 +71,21 @@ To begin, create a copy of `config.example.py` and rename it to `config.py`.
 Modify the values in the file to suit your needs.
 The values marked with a **\*** must be changed.
 
-* credentials
-    * address\* - the email address created for the bot
-    * password\* - the password for the above email address
-    * imap_host - the IMAP host address; only change this if you aren't using Gmail
-    * smtp_host - the SMTP host address; only change this if you aren't using Gmail
-* email_subject - the subject of the email sent by the Printer Monitor
-* polling_period - the number of seconds the Monitor waits between checking for new emails
-* max_emails - the number of emails the monitor will process, any more will be discarded to prevent spam; set to 0 if you want to read all emails
-* 2fa_lookback - the number of seconds for the two-factor authentication to look back for codes; this should be enough time to copy the code and send an email
-* approved_users* - email address : OTP secret pairs; each user that can access the Monitor should be set up
-* camera_port* - the port on your device that the camera is connected to; it is probably easiest to guess and check until you get the correct value
-* image_resolution - the resolution of the image to take; most webcams should support 640x480, but you can set if higher if yours supports it
-* camera_boot_time - the time taken in seconds to initialise the camera; this should be increased if your images look too dark
-* logger_filesize - the maximum size of each log file (in bytes); decrease this if your device has limited storage capacity
-* log_filecount - the number of log files to produce before overwriting the first one; minimum value: 1
+* **credentials**
+    * **address**\* - the email address created for the bot
+    * **password**\* - the password for the above email address
+    * **imap_host** - the IMAP host address; only change this if you aren't using Gmail
+    * **smtp_host** - the SMTP host address; only change this if you aren't using Gmail
+* **email_subject** - the subject of the email sent by the Printer Monitor
+* **polling_period** - the number of seconds the Monitor waits between checking for new emails
+* **max_emails** - the number of emails the monitor will process, any more will be discarded to prevent spam; set to 0 if you want to read all emails
+* **2fa_lookback** - the number of seconds for the two-factor authentication to look back for codes; this should be enough time to copy the code and send an email
+* **approved_users**\* - email address : OTP secret pairs; each user that can access the Monitor should be set up
+* **camera_port**\* - the port on your device that the camera is connected to; it is probably easiest to guess and check until you get the correct value
+* **image_resolution** - the resolution of the image to take; most webcams should support 640x480, but you can set if higher if yours supports it
+* **camera_boot_time** - the time taken in seconds to initialise the camera; this should be increased if your images look too dark
+* **logger_filesize** - the maximum size of each log file (in bytes); decrease this if your device has limited storage capacity
+* **log_filecount** - the number of log files to produce before overwriting the first one; minimum value: 1
 
 **IMPORTANT:** make sure you keep this file private as it contains the password for your email service
 
@@ -107,14 +107,61 @@ There are a few possible issues you may face:
 
 ### Starting up
 
-Run `python main.py`.
+To get started, you need to run the main.py script.
+If you are running it manually (i.e. by typing the command yourself), you should simply enter `python main.py`.
 
-<!-- TODO this section should explain everything that happens when you run the bot_daemon script -->
+This script will ask you which script you wish to run.
+The options you are given are to run the main script, run the camera test, or run the 2-factor authentication setup.
+
+Running the main script will start up the email polling loop which will automatically fetch emails according to the config file.
+If a valid email is received, the Monitor will send a response email with the photo captured from the webcam.
+
+The camera test script will take a photo and allow the user to choose to save it to the disk or display it.
+There may be issues with displaying the image, so saving it to disk is always recommended.
+
+The 2-factor authentication script allows you to set up your one-time password.
+This will generate a key that you should enter into your authenticator app and then will request the code given by the app.
+If the code matches, then it was a success.
+You should copy the key into the config file along with the email address you wish to associate with it (one key can be associated with multiple email addresses, but not vice versa).
+
+---
+
+If you want to automate this script (to run it on boot, for example), there are also command line arguments that you can set.
+These can be viewed by running `python main.py -h`.
+
+Note that the camera test will automatically save the file on disk if started with the `-c`/`--cam-test` flag.
 
 ## Security
 
-<!-- TODO this section will talk about how this service tries to be secure
-Mention the challenge for anyone to try access my one -->
+When developing this, I tried to make this as secure as I could, without relying on a paid service.
+The most important part was that I didn't trust myself to be able to maintain security on a port if I opened one up on my network.
+I didn't feel that it was worth the risk for being able to view a print.
+
+The system has 3 layers of security:
+
+- Secure email servers
+- One-time passwords
+- Request limiting
+
+The Monitor, by default, uses Gmail but this could be changed if desired.
+Any major email client that you choose to use will most likely be very secure.
+The photos of your printer are probably going to be the least of your concerns if there was a security breach.
+
+One obvious issue with emails is the possibility of spoofing an email address.
+If someone knows the Monitor's email address and your authorised email address, they could send an email as yourself to get a photo.
+The addition of one-time passwords solves this issue, as it requires any email to have a one-time password (OTP) in the email body in order for the email to be verified.
+Without the correct OTP, the device will reject the request without sending any response.
+
+A malicious user could attempt to send thousands of emails at a time with different passwords.
+To prevent this, the system implements request limiting to limit itself to reading only the latest few emails.
+This could negatively impact a genuine user if someone is trying to gain access (as it will ignore requests above the limit even if the OTP is correct), but it means that a malicious user will have to get very lucky to get the correct code during the correct period.
+
+Additionally, even if a malicious user does manage to guess the correct OTP within the request limit with a spoofed email address, this does not give them enough information to get the correct OTP immediately a second time.
+They improve their guesses each time they get a correct code, but this will be so slow that I doubt they'll be able to do it within any realistic amount of time.
+
+In fact, I am so confident in how secure this is, that I implore anyone to try to get a photo from the camera.
+If you can send me a photo taken of my 3D printer, you will be rewarded (once I figure out what the reward should be...).
+Nothing needs to be printing, it just needs to be a photo taken from my webcam of my printer.
 
 ## Limitations
 

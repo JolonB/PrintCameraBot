@@ -38,6 +38,7 @@ def check_mail(mail: imaplib.IMAP4_SSL, config: dict):
         raise RuntimeError("Error searching for unread emails")
 
     email_ids = email_ids[0].split()
+    print(email_ids)
     logger.info("Found {} new emails".format(len(email_ids)))
 
     emails = []
@@ -60,6 +61,7 @@ def check_mail(mail: imaplib.IMAP4_SSL, config: dict):
         # Open emails but don't process them if the max number of emails has been reached
         # If we don't open them, they won't be marked as read and will be opened later
         if config["max_emails"] > 0 and emails_read >= config["max_emails"]:
+            logger.info("Reached max number of emails; marking as read")
             continue
 
         # Remove any data that isn't a tuple because we don't care about those
@@ -122,16 +124,20 @@ def send_image(address: str, filename: str, config: dict):
 
 def clear_large_mail(mail: imaplib.IMAP4_SSL, config: dict):
     mail.noop()
+    logger.info("Searching for large mail")
     # Search for all mail that is large and was sent *to* the configured email address
-    result, data = mail.search(
+    result, email_ids = mail.search(
         None, '(NOT SMALLER 10000 TO "{}")'.format(config["credentials"]["address"])
     )
 
     if result != "OK":
         raise RuntimeError("Error searching for large emails")
 
+    email_ids = email_ids[0].split()
+    logger.info("Found {} large emails".format(len(email_ids)))
+
     # Delete all mail in data
-    for id_ in data[0].split():
+    for id_ in email_ids:
         mail.store(id_, "+FLAGS", "\\Deleted")
     # Permanently delete large mail (at least, it *should* delete the mail)
     mail.expunge()
