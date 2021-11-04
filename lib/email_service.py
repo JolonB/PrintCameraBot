@@ -38,7 +38,6 @@ def check_mail(mail: imaplib.IMAP4_SSL, config: dict):
         raise RuntimeError("Error searching for unread emails")
 
     email_ids = email_ids[0].split()
-    print(email_ids)
     logger.info("Found {} new emails".format(len(email_ids)))
 
     emails = []

@@ -3,7 +3,7 @@
         "address": "test@email.com",
         "password": "password",
         "imap_host": "imap.gmail.com",
-        "smtp_host": "smtp.gmail.com",
+        "smtp_host": "smtp.gmail.com"
     },
     "email_subject": "Requested Image",
     "polling_period": 60,
@@ -15,5 +15,5 @@
     "exposure_time": 160,
     "camera_boot_time": 1,
     "logger_filesize": 10000,
-    "log_filecount": 5,
+    "log_filecount": 5
 }
